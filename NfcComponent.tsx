@@ -10,59 +10,58 @@ const NfcComponent = () => {
   useEffect(() => {
     NfcManager.start();
     return () => {
-      NfcManager.cancelTechnologyRequest().catch(() => {});
+      NfcManager.cancelTechnologyRequest().catch(() => { });
     };
   }, []);
 
   async function handleReadNfc() {
-  if (isReading) return;
-  setIsReading(true);
+    if (isReading) return;
+    setIsReading(true);
 
-  // Função para cancelar request e lançar erro de timeout
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    const timeoutId = setTimeout(() => {
-      NfcManager.cancelTechnologyRequest().catch(() => {});
-      reject(new Error(`Tempo de leitura esgotado (${waitTimeToRead / 1000} s).`));
-    }, waitTimeToRead);
+    // Função para cancelar request e lançar erro de timeout
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      const timeoutId = setTimeout(() => {
+        NfcManager.cancelTechnologyRequest().catch(() => { });
+        reject(new Error(`Tempo de leitura esgotado (${waitTimeToRead / 1000} s).`));
+      }, waitTimeToRead);
 
-    // Limpa o timeout se a Promise principal resolver antes
-    return () => clearTimeout(timeoutId);
-  });
+      // Limpa o timeout se a Promise principal resolver antes
+      return () => clearTimeout(timeoutId);
+    });
 
-  try {
-    await NfcManager.requestTechnology(NfcTech.Ndef);
+    try {
+      await NfcManager.requestTechnology(NfcTech.Ndef);
 
-    // Executando a leitura e timeout em paralelo
-    const tag = await Promise.race([
-      NfcManager.getTag(),
-      timeoutPromise,
-    ]);
+      // Executando a leitura e timeout em paralelo
+      const tag = await Promise.race([
+        NfcManager.getTag(),
+        timeoutPromise,
+      ]);
 
-    Alert.alert('Tag NFC lida', JSON.stringify(tag));
-  } catch (ex: unknown) {
-    let message = 'Não foi possível ler dados do dispositivo NFC. ';
-    if (
-      ex &&
-      typeof ex === 'object' &&
-      'message' in ex &&
-      typeof (ex as any).message === 'string'
-    ) {
-      message += (ex as any).message;
+      Alert.alert('Tag NFC lida', JSON.stringify(tag));
+    } catch (ex: unknown) {
+      let message = `Falha ao ler dados NFC dentro do tempo esperado (${waitTimeToRead / 1000} s). `;
+      if (
+        ex &&
+        typeof ex === 'object' &&
+        'message' in ex &&
+        typeof (ex as any).message === 'string'
+      ) {
+        message += (ex as any).message;
+      }
+      Alert.alert('Erro', message);
+    } finally {
+      NfcManager.cancelTechnologyRequest().catch(() => { });
+      setIsReading(false);
     }
-    Alert.alert('Erro', message);
-  } finally {
-    NfcManager.cancelTechnologyRequest().catch(() => {});
-    setIsReading(false);
   }
-}
-
 
   return (
     <View style={styles.container}>
       <Text style={{
-          color: colorScheme === 'dark' ? 'white' : 'black',
-          margin: 48, fontSize: 16, textAlign:"center"
-        }}>
+        color: colorScheme === 'dark' ? 'white' : 'black',
+        margin: 48, fontSize: 16, textAlign: "center"
+      }}>
         Aproxime-se de qualquer dispositivo que emita dados NFC
         e pressione o botão abaixo.
       </Text>
