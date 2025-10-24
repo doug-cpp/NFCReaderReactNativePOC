@@ -15,18 +15,17 @@ const NfcComponent = () => {
   }, []);
 
   async function handleReadNfc() {
+    
     if (isReading) return;
     setIsReading(true);
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     // Função para cancelar request e lançar erro de timeout
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      const timeoutId = setTimeout(() => {
+    const timeoutPromise = new Promise<string>((_, reject) => {
+      timeoutId = setTimeout(() => {
         NfcManager.cancelTechnologyRequest().catch(() => { });
-        reject(new Error(`Tempo de leitura esgotado (${waitTimeToRead / 1000} s).`));
+        reject(`Tempo de leitura esgotado (${waitTimeToRead / 1000} s).`);
       }, waitTimeToRead);
-
-      // Limpa o timeout se a Promise principal resolver antes
-      return () => clearTimeout(timeoutId);
     });
 
     try {
@@ -40,6 +39,9 @@ const NfcComponent = () => {
 
       Alert.alert('Tag NFC lida', JSON.stringify(tag));
     } catch (ex: unknown) {
+
+      timeoutPromise.catch(() => {clearTimeout(timeoutId)});
+
       let message = `Falha ao ler dados NFC dentro do tempo esperado (${waitTimeToRead / 1000} s). `;
       if (
         ex &&
