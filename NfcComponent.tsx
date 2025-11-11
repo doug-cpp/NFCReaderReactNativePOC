@@ -29,7 +29,14 @@ const NfcComponent = () => {
     });
 
     try {
-      await NfcManager.requestTechnology(NfcTech.Ndef);
+        // Tentando requisitar várias tecnologias NFC:
+        await NfcManager.requestTechnology([
+          NfcTech.Ndef,  // NFC Forum Type 2, 3, 4
+          NfcTech.NfcA,  // NFC Forum Type 1
+          NfcTech.IsoDep,  // ISO 7816-4
+          NfcTech.MifareClassic,  // MIFARE Classic
+          NfcTech.MifareUltralight,  // MIFARE Ultralight
+      ]);
 
       // Executando a leitura e timeout em paralelo
       const tag = await Promise.race([
