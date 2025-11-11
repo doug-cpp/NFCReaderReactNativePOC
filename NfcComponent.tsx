@@ -37,7 +37,7 @@ const NfcComponent = () => {
         timeoutPromise,
       ]);
 
-      Alert.alert('Tag NFC lida', JSON.stringify(tag));
+      Alert.alert('Tag NFC lida genericamente:', JSON.stringify(tag, null, 8));
     } catch (ex: unknown) {
 
       timeoutPromise.catch(() => {clearTimeout(timeoutId)});
