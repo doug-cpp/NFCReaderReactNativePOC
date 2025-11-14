@@ -1,5 +1,5 @@
 {
-  "name": "NFCReaderReactNativePOC",
+  "name": "react-native-nfc-reader-poc",
   "version": "0.0.1",
   "private": true,
   "scripts": {
